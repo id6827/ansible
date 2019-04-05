@@ -1,0 +1,10 @@
+---
+- name: test
+  hosts: all
+  become: yes
+  tasks: 
+    - debug: var=ansible_all_ipv4_addresses
+    - debug: var=ansible_default_ipv4.address
+    - debug: var=hostvars[inventory_hostname]['ansible_default_ipv4']['address']
+    - debug: var=hostvars[inventory_hostname]['ansible_default_ipv6']['address']
+    - debug: var=ansible_enp0s9.ipv4.address
