@@ -1,0 +1,85 @@
+---
+- name: node 설정
+  hosts: all
+  become: yes
+  tasks: 
+  - name: Config.toml 생성
+    copy:
+      dest: "/root/config.toml"
+      content: |
+        # aergo TOML Configration File (https://github.com/toml-lang/toml)
+        # base configurations
+        datadir = "./data"
+        enableprofile = true
+        profileport = 6060
+        enabletestmode = true
+
+        [rpc]
+        netserviceaddr = "0.0.0.0"
+        netserviceport = 7845
+        nstls = false
+        nscert = ""
+        nskey = ""
+        nsallowcors = false
+
+        [p2p]
+        netprotocoladdr = "{{ ansible_default_ipv4.address }}"  # Insert IP address from this machine
+        netprotocolport = 7846
+        npbindaddr = "0.0.0.0"
+        npbindport = 7846
+        nptls = false
+        npcert = ""
+        npkey = ""  # Name of key file of node
+        npaddpeers = [
+        ]
+
+        npexposeself = false
+
+        [blockchain]
+        usefastsyncer = true
+        blockchainplaceholder = false
+        coinbaseaccount = ""
+
+        [mempool]
+        showmetrics = true
+        dumpfilepath = "./data/mempool.dump"
+
+        [consensus]
+        enablebp = true
+        blockinterval = 1
+
+  - name: epel-release 설치
+    yum:
+      name: epel-release
+      state: installed
+
+  - name: python-pip 설치
+    yum:
+      name: python-pip
+      state: installed
+
+  - name: docker-py 설치
+    pip:
+      name: docker-py
+      state: present
+
+  - name: Restart a container
+    docker_container:
+      name: aergo-node
+      image: aergo/node:0.12 
+      state: started
+      restart: yes
+      restart_policy: always
+      volumes:
+        - "/root:/aergo"
+      ports:
+        - "7845:7845"
+        - "7846:7646"
+        - "6060:6060"
+      log_driver: json-file
+      log_options:
+        max-size: 1000m
+        max-file: 7
+      command: aergosvr --home /aergo --config /aergo/config.toml
+
+
