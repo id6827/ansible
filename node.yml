@@ -1,85 +1,116 @@
 ---
-- name: node 설정
+- name: playbook - node
   hosts: all
   become: yes
-  tasks: 
-  - name: Config.toml 생성
-    copy:
-      dest: "/root/config.toml"
-      content: |
-        # aergo TOML Configration File (https://github.com/toml-lang/toml)
-        # base configurations
-        datadir = "./data"
-        enableprofile = true
-        profileport = 6060
-        enabletestmode = true
+  tasks:
+    - name: yum install epel-release
+      yum:
+        name: epel-release
+        state: present
 
-        [rpc]
-        netserviceaddr = "0.0.0.0"
-        netserviceport = 7845
-        nstls = false
-        nscert = ""
-        nskey = ""
-        nsallowcors = false
+    # - name: yum update
+    #   yum:
+    #     name: '*'
+    #     state: latest
+    #     update_only: yes
 
-        [p2p]
-        netprotocoladdr = "{{ ansible_default_ipv4.address }}"  # Insert IP address from this machine
-        netprotocolport = 7846
-        npbindaddr = "0.0.0.0"
-        npbindport = 7846
-        nptls = false
-        npcert = ""
-        npkey = ""  # Name of key file of node
-        npaddpeers = [
-        ]
+    - name: wget https://get.docker.com/
+      get_url:
+        url: https://get.docker.com/
+        dest: /root/docker.sh
+        mode: 0511
 
-        npexposeself = false
+    - name: ./docker.sh
+      command: /root/docker.sh
 
-        [blockchain]
-        usefastsyncer = true
-        blockchainplaceholder = false
-        coinbaseaccount = ""
+    - name: service docker start
+      command: service docker start
 
-        [mempool]
-        showmetrics = true
-        dumpfilepath = "./data/mempool.dump"
+    - name: yum python-pip
+      yum:
+        name: python-pip
+        state: present
 
-        [consensus]
-        enablebp = true
-        blockinterval = 1
+    - name: pip install 'docker-py'
+      pip:
+        name: docker-py
+        executable: pip2
+        state: present
 
-  - name: epel-release 설치
-    yum:
-      name: epel-release
-      state: installed
+    - name: docker pull aergo/node
+      docker_image:
+        name: aergo/node:0.12
+        pull: yes
 
-  - name: python-pip 설치
-    yum:
-      name: python-pip
-      state: installed
+    # - name: example copying file with owner and permissions
+    #   copy:
+    #     src: /srv/myfiles/foo.conf
+    #     dest: /etc/foo.conf
+    #     owner: foo
+    #     group: foo
+    #     mode: 0644
 
-  - name: docker-py 설치
-    pip:
-      name: docker-py
-      state: present
+    - name: create a config.toml
+      copy:
+        dest: "/root/config.toml"
+        content: |
+          # aergo TOML Configration File (https://github.com/toml-lang/toml)
+          # base configurations
+          datadir = "./data"
+          enableprofile = true
+          profileport = 6060
+          enabletestmode = true
 
-  - name: Restart a container
-    docker_container:
-      name: aergo-node
-      image: aergo/node:0.12 
-      state: started
-      restart: yes
-      restart_policy: always
-      volumes:
-        - "/root:/aergo"
-      ports:
-        - "7845:7845"
-        - "7846:7646"
-        - "6060:6060"
-      log_driver: json-file
-      log_options:
-        max-size: 1000m
-        max-file: 7
-      command: aergosvr --home /aergo --config /aergo/config.toml
+          [rpc]
+          netserviceaddr = "0.0.0.0"
+          netserviceport = 7845
+          nstls = false
+          nscert = ""
+          nskey = ""
+          nsallowcors = false
 
+          [p2p]
+          netprotocoladdr = "{{ ansible_default_ipv4.address }}"  # Insert IP address from this machine
+          netprotocolport = 7846
+          npbindaddr = "0.0.0.0"
+          npbindport = 7846
+          nptls = false
+          npcert = ""
+          npkey = ""  # Name of key file of node
+          npaddpeers = [
+          ]
+
+          npexposeself = false
+
+          [blockchain]
+          usefastsyncer = true
+          blockchainplaceholder = false
+          coinbaseaccount = ""
+
+          [mempool]
+          showmetrics = true
+          dumpfilepath = "./data/mempool.dump"
+
+          [consensus]
+          enablebp = true
+          blockinterval = 12
+
+    - name: docker run aergo-node
+      docker_container:
+        name: aergo-node
+        image: aergo/node:0.12
+        state: started
+        restart: yes
+        restart_policy: always
+        volumes:
+          - "/root:/aergo"
+        ports:
+          - "7845:7845"
+          - "7846:7846"
+          - "6060:6060"
+        log_driver: json-file
+        log_options:
+          max-size: 1000m
+          max-file: 7
+        command: aergosvr --home /aergo --config /aergo/config.toml
 
