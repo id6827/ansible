@@ -78,7 +78,7 @@
         state: started
         restart: yes
         restart_policy: always
-        command: esindexer -A {{ node_address }}:7845 -E {{ ansible_default_ipv4.address }}:9200 --prefix chain_
+        command: esindexer -A {{ node_address }}:7845 -E {{ ansible_ssh_host }}:9200 --prefix chain_
 
     - name: copy scan_backend.img
       copy:
@@ -131,7 +131,7 @@
               }
 
               location /chain/ {
-                  proxy_pass http://{{ ansible_default_ipv4.address }}:3000;
+                  proxy_pass http://{{ ansible_ssh_host }}:3000;
 
                   add_header 'Access-Control-Allow-Origin' "$http_origin"; # ignore CORS on localhost
                   add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
@@ -165,7 +165,7 @@
           - "3000:3000"
         env:
           HOST: "http://{{ node_address }}:3000"
-          ES_HOST: "{{ ansible_default_ipv4.address }}:9200"
+          ES_HOST: "{{ ansible_ssh_host }}:9200"
 
     - name: docker run aergo_frontend
       docker_container:
