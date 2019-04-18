@@ -113,4 +113,3 @@
           max-size: 1000m
           max-file: 7
         command: aergosvr --home /aergo --config /aergo/config.toml
-
