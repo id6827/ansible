@@ -42,6 +42,7 @@
         name: aergo/node:0.12
         pull: yes
 
+<<<<<<< HEAD
     # - name: example copying file with owner and permissions
     #   copy:
     #     src: /srv/myfiles/foo.conf
@@ -50,6 +51,8 @@
     #     group: foo
     #     mode: 0644
 
+=======
+>>>>>>> 32e36f12dcbfa7a3263c7ce16dceebad6086ca2a
     - name: create a config.toml
       copy:
         dest: "/root/config.toml"
