@@ -70,7 +70,7 @@
           nsallowcors = false
 
           [p2p]
-          netprotocoladdr = "{{ ansible_default_ipv4.address }}"  # Insert IP address from this machine
+          netprotocoladdr = "{{ ansible_ssh_host }}"  # Insert IP address from this machine
           netprotocolport = 7846
           npbindaddr = "0.0.0.0"
           npbindport = 7846
