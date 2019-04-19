@@ -101,6 +101,7 @@
         name: scan_backend
         tag: latest
         load_path: /root/scan_backend.img
+        timeout: 3600
 
     - name: docker load scan_frontend.img
       docker_image:
