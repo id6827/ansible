@@ -26,6 +26,9 @@
     - name: service docker start
       command: service docker start
 
+    - name: chkconfig docker on
+      command: chkconfig docker on
+
     - name: yum python-pip
       yum:
         name: python-pip
